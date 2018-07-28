@@ -28,8 +28,8 @@ batch_size = 32
 epochs = 1
 trans = transforms.ToTensor()
 
-mnist_trainset = datasets.EMNIST(root='./mnist', train=True, download=True, transform=trans)
-mnist_testset = datasets.EMNIST(root='./mnist', train=False, download=True, transform=trans)
+mnist_trainset = datasets.MNIST(root='./mnist', train=True, download=True, transform=trans)
+mnist_testset = datasets.MNIST(root='./mnist', train=False, download=True, transform=trans)
 mnist_train_loader = torch.utils.data.DataLoader(mnist_trainset, batch_size=batch_size)
 mnist_test_loader = torch.utils.data.DataLoader(mnist_testset, batch_size=1)
 
