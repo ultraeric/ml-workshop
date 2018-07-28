@@ -8,8 +8,8 @@ from torchvision import datasets
 from torchvision import transforms
 import cv2
 
-batch_size = 8
-epochs = 3
+batch_size = 16
+epochs = 5
 trans = transforms.Compose([transforms.RandomRotation(30),
                             transforms.RandomResizedCrop(224, scale=(0.75, 1.0)),
                             transforms.ToTensor()])
@@ -23,18 +23,17 @@ train_loader = torch.utils.data.DataLoader(
 model = models.squeezenet1_1(pretrained=True)
 # model = torch.load('gesture_classifier.model')
 params = model.parameters()
-optimizer = optim.SGD(params, lr=1e-4, momentum=0.9)
-loss_func = nn.CrossEntropyLoss()
+optimizer = optim.SGD(params, lr=1e-3, momentum=0.9)
+loss_func = torch.nn.BCEWithLogitsLoss()
 
 for _ in range(epochs):
     for i, (x, y) in enumerate(train_loader):
-        pred = model(x)[:,0:2]
-        loss = loss_func(pred, y)
+        pred = (model(x)[:,0] - 0.5)
+        loss = loss_func(pred, y.float())
         loss.backward()
         optimizer.step()
         model.zero_grad()
-        if i % 5 == 0:
-            print(loss.item())
+        print(loss.item())
 torch.save(model, 'gesture_classifier.model')
 model = torch.load('gesture_classifier.model')
 
@@ -59,8 +58,9 @@ while exists:
     end_x = frame.shape[1] - start_x
     frame = frame[:,start_x:end_x,:]
     small_frame = torch.Tensor(cv2.resize(frame, (224, 224))).permute(2, 0, 1).unsqueeze(0)
-    pred = model(small_frame)
-    pred = pred.detach().numpy()[0][0:2].argmax()
+    pred = (model(small_frame)[0][0] - 0.5).sigmoid()
+    print(pred.detach().numpy())
+    pred = 1 if pred.detach().numpy() > 0.5 else 0
     cv2.putText(frame,
                 'Predicted: {}'.format(pred),
                 bottomLeftCornerOfText,

@@ -2,7 +2,7 @@ import cv2
 import os
 from datetime import datetime
 
-label = 0
+label = 1
 directory_name = './data/{}'.format(label)
 window_name = "Capturing Label {}".format(label)
 
